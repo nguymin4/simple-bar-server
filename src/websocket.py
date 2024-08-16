@@ -1,6 +1,6 @@
 from aiohttp import web
 
-_WS_CLIENTS = {}
+_WS_CLIENTS: dict[str, web.WebSocketResponse] = {}
 
 
 async def websocket_handler(request: web.Request):
@@ -15,14 +15,15 @@ async def websocket_handler(request: web.Request):
         await ws.close()
         simple_bar_ws.logger.info("websocket connection closed due to missing ?target=")
     else:
-        # await ws.send_str(msg.data + "/answer")
         _WS_CLIENTS[f"{target}-{user_widget_index}"] = ws
 
     return ws
 
 
-async def get_ws_client(target: str, user_widget_index=""):
-    _WS_CLIENTS[f"{target}-{user_widget_index}"]
+def send_to_ws_client(target: str, user_widget_index="", payload=None):
+    key = f"{target}-{user_widget_index}"
+    if key in _WS_CLIENTS:
+        _WS_CLIENTS[key].send_json(payload)
 
 
 simple_bar_ws = web.Application()
