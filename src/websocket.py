@@ -13,17 +13,27 @@ async def websocket_handler(request: web.Request):
 
     if not target:
         await ws.close()
-        simple_bar_ws.logger.info("websocket connection closed due to missing ?target=")
-    else:
-        _WS_CLIENTS[f"{target}-{user_widget_index}"] = ws
+        print("websocket connection not kept due to missing ?target=")
+        return
+
+    _WS_CLIENTS[f"{target}-{user_widget_index}"] = ws
+    async for msg in ws:
+        print(msg.type)
+        if msg.type == web.WSMsgType.close:
+            break
 
     return ws
 
 
-def send_to_ws_client(target: str, user_widget_index="", payload=None):
-    key = f"{target}-{user_widget_index}"
-    if key in _WS_CLIENTS:
-        _WS_CLIENTS[key].send_json(payload)
+async def send_to_ws_client(target: str, user_widget_index=None, payload=None):
+    key = f"{target}-{user_widget_index or ''}"
+    try:
+        if key in _WS_CLIENTS:
+            await _WS_CLIENTS[key].send_json(payload)
+        else:
+            print(f"ws client not found for {target} {payload}")
+    except Exception as err:
+        print("Error: send_to_ws_client", err)
 
 
 simple_bar_ws = web.Application()

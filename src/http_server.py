@@ -18,7 +18,8 @@ async def handle_widget(request: web.Request):
         return web.Response(status=400, text=f"Unknown widget action {action}")
 
     user_widget_index = request.match_info.get("user_widget_index")
-    send_to_ws_client(kind, user_widget_index, {"action": action})
+    await send_to_ws_client(kind, user_widget_index, {"action": action})
+    return web.Response(status=200)
 
 
 http_server = web.Application()

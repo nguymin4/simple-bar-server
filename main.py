@@ -3,20 +3,21 @@ import subprocess
 
 from aiohttp import web
 
-from src.dock_badges import get_badges
+from src.app_badges import get_app_badges
+from src.constants import APP_BADGES_REFRESH_SEC, HTTP_PORT, WS_PORT
 from src.http_server import http_server
-from src.websocket import simple_bar_ws
-
-HTTP_PORT = 7776
-WS_PORT = 7777
-BADGES_REFRESH_SEC = 10
+from src.websocket import send_to_ws_client, simple_bar_ws
 
 
 async def schedule_check_badges():
     while True:
-        app_badges = get_badges()
-        print(app_badges)
-        await asyncio.sleep(BADGES_REFRESH_SEC)
+        try:
+            app_badges = get_app_badges()
+            await send_to_ws_client("app-badges", None, {"action": "refresh", "data": app_badges})
+        except Exception as err:
+            print("Error: schedule_check_badges", err)
+        finally:
+            await asyncio.sleep(APP_BADGES_REFRESH_SEC)
 
 
 def refresh_uebersicht():
