@@ -3,6 +3,7 @@ import logging
 from aiohttp import web
 
 _WS_CLIENTS: dict[str, web.WebSocketResponse] = {}
+_DEFAULT_USER_WIDGET_INDEX = "0"
 
 
 async def websocket_handler(request: web.Request):
@@ -10,7 +11,7 @@ async def websocket_handler(request: web.Request):
     await ws.prepare(request)
 
     target = request.rel_url.query.get("target")
-    user_widget_index = request.rel_url.query.get("userWidgetIndex", "")
+    user_widget_index = request.rel_url.query.get("userWidgetIndex", _DEFAULT_USER_WIDGET_INDEX)
     logging.info("websocket new connection opened for %s %s", target, user_widget_index)
 
     if not target:
@@ -27,7 +28,7 @@ async def websocket_handler(request: web.Request):
 
 
 async def send_to_ws_client(target: str, user_widget_index=None, payload=None):
-    key = f"{target}-{user_widget_index or ''}"
+    key = f"{target}-{user_widget_index or _DEFAULT_USER_WIDGET_INDEX}"
     try:
         if key in _WS_CLIENTS:
             await _WS_CLIENTS[key].send_json(payload)
