@@ -1,6 +1,8 @@
 import asyncio
+import logging
 import subprocess
 
+import coloredlogs
 from aiohttp import web
 
 from src.app_badges import get_app_badges
@@ -8,26 +10,27 @@ from src.constants import APP_BADGES_REFRESH_SEC, HTTP_PORT, WS_PORT
 from src.http_server import http_server
 from src.websocket import send_to_ws_client, simple_bar_ws
 
+coloredlogs.install(level=logging.INFO)
+
 
 async def schedule_check_badges():
     while True:
         try:
             app_badges = get_app_badges()
             await send_to_ws_client("app-badges", None, {"action": "refresh", "data": app_badges})
-        except Exception as err:
-            print("Error: schedule_check_badges", err)
+        except Exception:
+            logging.warning("schedule_check_badges", exc_info=True)
         finally:
             await asyncio.sleep(APP_BADGES_REFRESH_SEC)
 
 
 def refresh_uebersicht():
-    print("Refreshing Uebersicht")
+    logging.info("Refreshing Uebersicht ...")
     try:
         subprocess.run(["/usr/bin/osascript", "-e", 'tell application id "tracesOf.Uebersicht" to refresh'])
-        print("Refreshed Uebersicht")
-    except Exception as err:
-        print(err)
-        print("Failed to refresh Uebersicht")
+        logging.info("Refreshed Uebersicht")
+    except Exception:
+        logging.warning("Failed to refresh Uebersicht", exc_info=True)
 
 
 async def start_app_runner(app: web.Application, name: str, port: int, callback=None):
@@ -35,7 +38,7 @@ async def start_app_runner(app: web.Application, name: str, port: int, callback=
     await runner.setup()
     site = web.TCPSite(runner, port=port)
     await site.start()
-    print(f"Started {name} at :{port}")
+    logging.info(f"Started {name} at :{port}")
 
     if callback:
         callback()

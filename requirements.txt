@@ -1,3 +1,4 @@
 aiohttp>=3.10
+coloredlogs>=15.0
 pyobjc>=10.3
 ruff>=0.6
