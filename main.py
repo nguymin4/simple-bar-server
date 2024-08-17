@@ -4,11 +4,14 @@ import subprocess
 
 import coloredlogs
 from aiohttp import web
+from setproctitle import setproctitle
 
 from src.app_badges import get_app_badges
 from src.constants import APP_BADGES_REFRESH_SEC, HTTP_PORT, WS_PORT
 from src.http_server import http_server
 from src.websocket import send_to_ws_client, simple_bar_ws
+
+setproctitle("simple-bar-server")
 
 coloredlogs.install(level=logging.INFO)
 
