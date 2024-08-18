@@ -47,7 +47,7 @@ def refresh_uebersicht():
 async def start_app_runner(app: web.Application, name: str, port: int, callback=None):
     runner = web.AppRunner(app, handle_signals=True)
     await runner.setup()
-    site = web.TCPSite(runner, shutdown_timeout=2, port=port)
+    site = web.TCPSite(runner, shutdown_timeout=5, port=port)
     await site.start()
     logger.info(f"Started {name} at :{port}")
 
@@ -63,6 +63,7 @@ async def main():
             schedule_check_badges(),
         )
     except asyncio.CancelledError:
+        await simple_bar_ws.shutdown()
         logger.info("main() cancelled")
     except Exception as e:
         logger.error(f"main() got: {e}")
