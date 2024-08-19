@@ -1,7 +1,5 @@
-# ref: https://gist.github.com/pudquick/eebc4d569100c8e3039bf3eae56bee4c
-
 import objc
-from Foundation import NSBundle
+from Foundation import NSAutoreleasePool, NSBundle
 
 CoreServices = NSBundle.bundleWithIdentifier_("com.apple.CoreServices")
 
@@ -22,17 +20,19 @@ def get_app_badges():
     kLSDefaultSessionID = 0xFFFFFFFE  # The actual value is `int -2`
     badge_label_key = "StatusLabel"  # TODO: Is there a `_kLS*` constant for this?
 
+    pool = NSAutoreleasePool.alloc().init()
     app_asns = _LSCopyRunningApplicationArray(kLSDefaultSessionID)  # noqa: F821
     app_infos = [_LSCopyApplicationInformation(kLSDefaultSessionID, asn, None) for asn in app_asns]  # noqa: F821
 
     app_badges = {}
     for app_info in app_infos:
         if app_info and badge_label_key in app_info:
-            app = app_info.get(_kLSDisplayNameKey)  # noqa: F821
             badge = get_badge(app_info, badge_label_key)
             if badge:
+                app = app_info.get(_kLSDisplayNameKey)  # noqa: F821
                 app_badges[app] = badge
 
+    del pool
     return app_badges
 
 
