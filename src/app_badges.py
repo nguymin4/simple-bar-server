@@ -1,3 +1,4 @@
+# Reference: https://gist.github.com/amomchilov/096ce5ceb9f4fca942ae0dd37066bc11
 import objc
 from Foundation import NSAutoreleasePool, NSBundle
 
@@ -17,6 +18,7 @@ objc.loadBundleVariables(CoreServices, globals(), constants)
 
 
 def get_app_badges():
+    # https://github.com/WebKit/WebKit/blob/9502f8564a09c70c745630ae35bf1ee90bf21395/Source/WebCore/PAL/pal/spi/cocoa/LaunchServicesSPI.h#L44-L46
     kLSDefaultSessionID = 0xFFFFFFFE  # The actual value is `int -2`
     badge_label_key = "StatusLabel"  # TODO: Is there a `_kLS*` constant for this?
 
