@@ -48,3 +48,6 @@ def get_badge(app_info, badge_label_key):
     except Exception:
         # Sometimes the badge can be a dot and we consider it as 1
         return 1
+
+if __name__ == "__main__":
+    print(get_app_badges())
